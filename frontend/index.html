@@ -1,9 +1,8 @@
-<!-- Save this as index.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>GitHub Events</title>
+    <title>Latest GitHub Event</title>
     <style>
       body {
         font-family: sans-serif;
@@ -13,70 +12,57 @@
       h1 {
         color: #333;
       }
-      ul {
-        padding-left: 0;
-      }
-      li {
-        list-style: none;
+      #event-box {
         background: #fff;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 5px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        max-width: 600px;
       }
     </style>
   </head>
   <body>
-    <h1>Latest GitHub Events</h1>
-    <ul id="event-list">
-      <li>Loading...</li>
-    </ul>
+    <h1>Latest GitHub Event</h1>
+    <div id="event-box">Loading latest event...</div>
 
     <script>
-      const BACKEND_URL = "https://webhook-git.onrender.com"; // 🔁 your ngrok URL here
+      const BACKEND_URL = "https://webhook-git.onrender.com"; // your deployed backend
 
-      async function fetchEvents() {
+      async function fetchLatestEvent() {
         try {
           const res = await fetch(`${BACKEND_URL}/events`);
           const events = await res.json();
 
-          const list = document.getElementById("event-list");
-          list.innerHTML = ""; // Clear existing list
+          const box = document.getElementById("event-box");
 
           if (!Array.isArray(events) || events.length === 0) {
-            list.innerHTML = "<li>No events found.</li>";
+            box.innerText = "No events yet.";
             return;
           }
 
-          events.forEach((event) => {
-            let text = "";
-            const { author, action, from_branch, to_branch, timestamp } = event;
+          const latest = events[0]; // Only show the most recent one
+          const { author, action, from_branch, to_branch, timestamp } = latest;
 
-            if (action === "PUSH") {
-              text = `${author} pushed to ${to_branch} on ${timestamp}`;
-            } else if (action === "PULL_REQUEST") {
-              text = `${author} submitted a pull request from ${from_branch} to ${to_branch} on ${timestamp}`;
-            } else if (action === "MERGE") {
-              text = `${author} merged branch ${from_branch} to ${to_branch} on ${timestamp}`;
-            }
+          let text = "";
+          if (action === "PUSH") {
+            text = `${author} pushed to <b>${to_branch}</b> on ${timestamp}`;
+          } else if (action === "PULL_REQUEST") {
+            text = `${author} submitted a pull request from <b>${from_branch}</b> to <b>${to_branch}</b> on ${timestamp}`;
+          } else if (action === "MERGE") {
+            text = `${author} merged <b>${from_branch}</b> into <b>${to_branch}</b> on ${timestamp}`;
+          }
 
-            const li = document.createElement("li");
-            li.textContent = text;
-            list.appendChild(li);
-          });
+          box.innerHTML = text;
         } catch (error) {
-          console.error("❌ Error fetching events:", error);
-          document.getElementById(
-            "event-list"
-          ).innerHTML = `<li>Error loading events.</li>`;
+          console.error("❌ Error fetching event:", error);
+          document.getElementById("event-box").innerText =
+            "Error loading event.";
         }
       }
 
-      // Initial fetch
-      fetchEvents();
-
-      // Poll every 15 seconds
-      setInterval(fetchEvents, 15000);
+      fetchLatestEvent();
+      setInterval(fetchLatestEvent, 15000); // Refresh every 15 seconds
     </script>
   </body>
 </html>
