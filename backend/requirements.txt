@@ -3,4 +3,5 @@ pymongo
 flask-cors
 dnspython
 pydantic
+pytz
 
