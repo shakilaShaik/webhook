@@ -5,6 +5,11 @@ from .models import GitHubEvent, build_event_from_github_payload
 routes = Blueprint("routes", __name__)
 
 
+@routes.route("/", methods=["GET"])
+def root():
+    return "✅ Webhook backend is live", 200
+
+
 @routes.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
